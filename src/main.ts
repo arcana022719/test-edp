@@ -71,6 +71,10 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <h1>Get started</h1>
     <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
   </div>
+    <div>
+      <h1>Test Merge Conflict</h1>
+      <p>This is the main branch version - feature A implemented</p>
+    </div>
   <button id="counter" type="button" class="counter"></button>
 </section>
 
