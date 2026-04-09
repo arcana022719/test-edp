@@ -1,11 +1,67 @@
-import './style.css'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.ts'
+import "./style.css";
+import typescriptLogo from "./assets/typescript.svg";
+import viteLogo from "./assets/vite.svg";
+import heroImg from "./assets/hero.png";
+import { setupCounter } from "./counter.ts";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+const themeStorageKey = "theme-preference";
+
+type Theme = "light" | "dark";
+
+function getStoredTheme(): Theme | null {
+  const theme = localStorage.getItem(themeStorageKey);
+  return theme === "dark" || theme === "light" ? theme : null;
+}
+
+function getSystemTheme(): Theme {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+  const toggleButton =
+    document.querySelector<HTMLButtonElement>("#theme-toggle");
+
+  if (toggleButton) {
+    toggleButton.textContent =
+      theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    toggleButton.setAttribute("aria-pressed", String(theme === "dark"));
+  }
+}
+
+function initTheme() {
+  const storedTheme = getStoredTheme();
+  const theme = storedTheme ?? getSystemTheme();
+
+  applyTheme(theme);
+
+  if (!storedTheme) {
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (event) => {
+        applyTheme(event.matches ? "dark" : "light");
+      });
+  }
+}
+
+function toggleTheme() {
+  const currentTheme =
+    (document.documentElement.dataset.theme as Theme) || getSystemTheme();
+  const nextTheme: Theme = currentTheme === "dark" ? "light" : "dark";
+
+  localStorage.setItem(themeStorageKey, nextTheme);
+  applyTheme(nextTheme);
+}
+
+document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
+  <div class="theme-toggle-wrap">
+    <button id="theme-toggle" type="button" class="theme-toggle" aria-pressed="false">
+      Switch to dark mode
+    </button>
+  </div>
   <div class="hero">
     <img src="${heroImg}" class="base" width="170" height="179">
     <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
@@ -55,6 +111,13 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
 <div class="ticks"></div>
 <section id="spacer"></section>
-`
+`;
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const themeToggleButton =
+  document.querySelector<HTMLButtonElement>("#theme-toggle");
+if (themeToggleButton) {
+  themeToggleButton.addEventListener("click", toggleTheme);
+}
+
+initTheme();
+setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
